@@ -12,6 +12,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		frappe.db.rollback()
 
 	def test_check_duplicate_for_wbs(self):
+
 		project_name = "test_project" + frappe.generate_hash(length=5)
 		if not frappe.db.exists("Project", {"project_name": project_name}):
 			frappe.get_doc({
@@ -26,7 +27,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		wbs = frappe.get_doc({
 			"doctype": "Work Breakdown Structure",
 			"project": project or "_T-Project-00001",
-			"wbs_name": "test_wbs",
+			"wbs_name": f"test_wbs_{frappe.generate_hash(length=5)}",
 			"company": "_Test Company",
 			"gl_account": "Cash - _TC",
 		})
@@ -68,7 +69,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 			{
 				"doctype": "Work Breakdown Structure",
 				"project": project or "_T-Project-00001",
-				"wbs_name": "test_wbs",
+				"wbs_name": f"test_wbs_{frappe.generate_hash(length=5)}",
 				"company": "_Test Company",
 				"gl_account": "Cash - _TC",
 			}
@@ -110,7 +111,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 			wbs = frappe.get_doc({
 				"doctype": "Work Breakdown Structure",
 				"project": project or "_T-Project-00001",
-				"wbs_name": f"test_wbs_allocation_{name_suffix}",
+				"wbs_name": f"test_wbs_{frappe.generate_hash(length=5)}",
 				"company": "_Test Company",
 				"gl_account": "Cash - _TC",
 			})
