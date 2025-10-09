@@ -11,53 +11,47 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
-	def test_wbs_monthly_distribution(self):
+	def test_check_duplicate_for_wbs(self):
 		project_name = "test_project" + frappe.generate_hash(length=5)
 		if not frappe.db.exists("Project", {"project_name": project_name}):
-			frappe.get_doc(
-				{"doctype": "Project", "company": "_Test Company", "project_name": project_name, "is_wbs": 1}
-			).insert()
+			frappe.get_doc({
+				"doctype": "Project",
+				"company": "_Test Company",
+				"project_name": project_name,
+				"is_wbs": 1
+			}).insert()
 
 		project = frappe.db.get_value("Project", {"project_name": project_name})
 
-		wbs = frappe.get_doc(
-			{
-				"doctype": "Work Breakdown Structure",
-				"project": project,
-				"wbs_name": "test_wbs",
-				"company": "_Test Company",
-				"gl_account": "Cash - _TC",
-			}
-		)
+		wbs = frappe.get_doc({
+			"doctype": "Work Breakdown Structure",
+			"project": project,
+			"wbs_name": "test_wbs",
+			"company": "_Test Company",
+			"gl_account": "Cash - _TC",
+		})
 		wbs.insert()
 		wbs.submit()
 		self.assertEqual(wbs.docstatus, 1)
-		
 
-
-		wbs_monthly_distribution = frappe.get_doc(
-			{
-				"doctype" : "WBS Monthly Distribution",
-				"for_wbs" : wbs.name
-
-			}
-		)
+		wbs_monthly_distribution = frappe.get_doc({
+			"doctype": "WBS Monthly Distribution",
+			"for_wbs": wbs.name
+		})
 		wbs_monthly_distribution.insert()
-		wbs_monthly_distribution.submit()
-		self.assertEqual(wbs_monthly_distribution.docstatus, 1)
 
-		wbs_monthly_distribution1 = frappe.get_doc(
-			{
-				"doctype" : "WBS Monthly Distribution",
-				"for_wbs" : wbs.name
-
-			}
-		)
+		wbs_monthly_distribution1 = frappe.get_doc({
+			"doctype": "WBS Monthly Distribution",
+			"for_wbs": wbs.name
+		})
 
 		with self.assertRaises(frappe.exceptions.ValidationError) as context:
 			wbs_monthly_distribution1.insert()
 
-		self.assertIn(f"A record with the same WBS already exists: {wbs_monthly_distribution1.name}", str(context.exception))
+		self.assertIn(
+			f"A record with the same WBS already exists: {wbs_monthly_distribution.name}",
+			str(context.exception)
+		)
 
 
 
@@ -99,4 +93,68 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		wbs_monthly_distributuon.delete()
 		wbs.load_from_db()
 		self.assertIsNone(wbs.linked_monthly_distribution)
+
+	def test_check_total_allocation(self):
+		project_name = "test_project" + frappe.generate_hash(length=5)
+		if not frappe.db.exists("Project", {"project_name": project_name}):
+			frappe.get_doc({
+				"doctype": "Project",
+				"company": "_Test Company",
+				"project_name": project_name,
+				"is_wbs": 1
+			}).insert()
+
+		project = frappe.db.get_value("Project", {"project_name": project_name})
+
+		def create_wbs(name_suffix):
+			wbs = frappe.get_doc({
+				"doctype": "Work Breakdown Structure",
+				"project": project,
+				"wbs_name": f"test_wbs_allocation_{name_suffix}",
+				"company": "_Test Company",
+				"gl_account": "Cash - _TC",
+			})
+			wbs.insert()
+			wbs.submit()
+			return wbs
+
+		child_meta = frappe.get_meta("Distribution Percentage")
+		has_month_field = any(df.fieldname == "month" for df in child_meta.fields)
+
+		valid_months = [
+			"January", "February", "March", "April", "May", "June",
+			"July", "August", "September", "October", "November", "December"
+		]
+		def make_distribution_rows(values):
+			rows = []
+			for i, val in enumerate(values):
+				row = {"allocation": val}
+				if has_month_field:
+					row["month"] = valid_months[i % 12]  # Wrap around safely
+				rows.append(row)
+			return rows
+
+		wbs_valid = create_wbs("valid")
+		valid_distribution = frappe.get_doc({
+			"doctype": "WBS Monthly Distribution",
+			"for_wbs": wbs_valid.name,
+			"monthly_distribution": make_distribution_rows([60, 40]),
+		})
+		valid_distribution.insert()  # Should pass
+		self.assertTrue(valid_distribution.name)
+
+		wbs_invalid = create_wbs("invalid")
+		invalid_distribution = frappe.get_doc({
+			"doctype": "WBS Monthly Distribution",
+			"for_wbs": wbs_invalid.name,
+			"monthly_distribution": make_distribution_rows([60, 50]),
+		})
+
+		with self.assertRaises(frappe.exceptions.ValidationError) as context:
+			invalid_distribution.insert()
+
+		self.assertIn(
+			"Total Monthly Distribution Allocation Percentage should not be more than 100%",
+			str(context.exception)
+		)
 
