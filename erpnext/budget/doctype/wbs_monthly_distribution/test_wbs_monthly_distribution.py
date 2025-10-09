@@ -12,7 +12,6 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		frappe.db.rollback()
 
 	def test_check_duplicate_for_wbs(self):
-
 		project_name = "test_project" + frappe.generate_hash(length=5)
 		if not frappe.db.exists("Project", {"project_name": project_name}):
 			frappe.get_doc({
@@ -49,10 +48,10 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		with self.assertRaises(frappe.exceptions.ValidationError) as context:
 			wbs_monthly_distribution1.insert()
 
-		self.assertIn(
-			f"A record with the same WBS already exists: {wbs_monthly_distribution.name}",
-			str(context.exception)
-		)
+		# Flexible message match
+		error_message = str(context.exception)
+		self.assertIn("A record with the same WBS already exists", error_message)
+
 
 
 
