@@ -32,7 +32,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		wbs = frappe.get_doc(
 			{
 				"doctype": "Work Breakdown Structure",
-				"project": project,
+				"project": project or "PROJ-0002",
 				"wbs_name": wbs_name,
 				"company": "_Test Company",
 				"gl_account": "Cash - _TC",
