@@ -25,7 +25,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 
 		wbs = frappe.get_doc({
 			"doctype": "Work Breakdown Structure",
-			"project": project,
+			"project": project or "_T-Project-00001",
 			"wbs_name": "test_wbs",
 			"company": "_Test Company",
 			"gl_account": "Cash - _TC",
@@ -67,7 +67,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		wbs = frappe.get_doc(
 			{
 				"doctype": "Work Breakdown Structure",
-				"project": project,
+				"project": project or "_T-Project-00001",
 				"wbs_name": "test_wbs",
 				"company": "_Test Company",
 				"gl_account": "Cash - _TC",
@@ -109,7 +109,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		def create_wbs(name_suffix):
 			wbs = frappe.get_doc({
 				"doctype": "Work Breakdown Structure",
-				"project": project,
+				"project": project or "_T-Project-00001",
 				"wbs_name": f"test_wbs_allocation_{name_suffix}",
 				"company": "_Test Company",
 				"gl_account": "Cash - _TC",
