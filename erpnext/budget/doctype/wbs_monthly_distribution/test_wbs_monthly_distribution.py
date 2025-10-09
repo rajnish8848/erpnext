@@ -34,6 +34,8 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		wbs.submit()
 		self.assertEqual(wbs.docstatus, 1)
 
+		frappe.db.delete("WBS Monthly Distribution", {"for_wbs": wbs.name})
+
 		wbs_monthly_distribution = frappe.get_doc({
 			"doctype": "WBS Monthly Distribution",
 			"for_wbs": wbs.name
@@ -48,11 +50,8 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		with self.assertRaises(frappe.exceptions.ValidationError) as context:
 			wbs_monthly_distribution1.insert()
 
-		# Flexible message match
 		error_message = str(context.exception)
 		self.assertIn("A record with the same WBS already exists", error_message)
-
-
 
 
 	def test_wbs_monthly_distribution_update_linked_wbs(self):
@@ -130,7 +129,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 			for i, val in enumerate(values):
 				row = {"allocation": val}
 				if has_month_field:
-					row["month"] = valid_months[i % 12]  # Wrap around safely
+					row["month"] = valid_months[i % 12] 
 				rows.append(row)
 			return rows
 
@@ -140,7 +139,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 			"for_wbs": wbs_valid.name,
 			"monthly_distribution": make_distribution_rows([60, 40]),
 		})
-		valid_distribution.insert()  # Should pass
+		valid_distribution.insert()  
 		self.assertTrue(valid_distribution.name)
 
 		wbs_invalid = create_wbs("invalid")
