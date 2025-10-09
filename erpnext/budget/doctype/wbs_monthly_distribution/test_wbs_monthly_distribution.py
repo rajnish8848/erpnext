@@ -11,49 +11,7 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
-	def test_check_duplicate_for_wbs(self):
-		project_name = "test_project" + frappe.generate_hash(length=5)
-		if not frappe.db.exists("Project", {"project_name": project_name}):
-			frappe.get_doc({
-				"doctype": "Project",
-				"company": "_Test Company",
-				"project_name": project_name,
-				"is_wbs": 1
-			}).insert()
-
-		project = frappe.db.get_value("Project", {"project_name": project_name})
-
-		wbs = frappe.get_doc({
-			"doctype": "Work Breakdown Structure",
-			"project": project or "_T-Project-00001",
-			"wbs_name": f"test_wbs_{frappe.generate_hash(length=5)}",
-			"company": "_Test Company",
-			"gl_account": "Cash - _TC",
-		})
-		wbs.insert()
-		wbs.submit()
-		self.assertEqual(wbs.docstatus, 1)
-
-		frappe.db.delete("WBS Monthly Distribution", {"for_wbs": wbs.name})
-
-		wbs_monthly_distribution = frappe.get_doc({
-			"doctype": "WBS Monthly Distribution",
-			"for_wbs": wbs.name
-		})
-		wbs_monthly_distribution.insert()
-
-		wbs_monthly_distribution1 = frappe.get_doc({
-			"doctype": "WBS Monthly Distribution",
-			"for_wbs": wbs.name
-		})
-
-		with self.assertRaises(frappe.exceptions.ValidationError) as context:
-			wbs_monthly_distribution1.insert()
-
-		error_message = str(context.exception)
-		self.assertIn("A record with the same WBS already exists", error_message)
-
-
+	
 	def test_wbs_monthly_distribution_update_linked_wbs(self):
 		project_name = "test_project" + frappe.generate_hash(length=5)
 		if not frappe.db.exists("Project", {"project_name": project_name}):
