@@ -11,7 +11,6 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		create_company()
 
 	def tearDown(self):
-		# Ensure some Python code runs so Codecov registers coverage
 		dummy = True  # pragma: no cover
 		frappe.db.rollback()
 
@@ -27,7 +26,6 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 	def _create_wbs(self, project):
 		"""Create a unique WBS for a given project"""
 		wbs_name = f"test_wbs_{frappe.generate_hash(length=12)}"
-		# Clean up any existing WBS Monthly Distribution for safety
 		frappe.db.delete("WBS Monthly Distribution", {"for_wbs": wbs_name})
 		wbs = frappe.get_doc(
 			{
@@ -45,11 +43,9 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		project = self._create_project()
 		wbs = self._create_wbs(project)
 
-		# First insert should succeed
 		wbs_md1 = frappe.get_doc({"doctype": "WBS Monthly Distribution", "for_wbs": wbs.name})
 		wbs_md1.insert()
 
-		# Second insert should fail due to duplicate
 		wbs_md2 = frappe.get_doc({"doctype": "WBS Monthly Distribution", "for_wbs": wbs.name})
 		with self.assertRaises(frappe.exceptions.ValidationError) as context:
 			wbs_md2.insert()
@@ -67,7 +63,6 @@ class TestWBSMonthlyDistribution(FrappeTestCase):
 		wbs.load_from_db()
 		self.assertEqual(wbs.linked_monthly_distribution, wbs_md.name)
 
-		# Delete monthly distribution and check linked field resets
 		wbs_md.delete()
 		wbs.load_from_db()
 		self.assertIsNone(wbs.linked_monthly_distribution)
