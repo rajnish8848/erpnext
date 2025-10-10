@@ -40,4 +40,4 @@ class WBSBudget(Document):
 		wbs: DF.Link | None
 		wbs_budget_items: DF.Table[WBSBudgetItems]
 	# end: auto-generated types
-	pass
+	
