@@ -4,6 +4,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.report.wbs_summary_report import wbs_summary_report
+from erpnext.accounts.report.wbs_summary_report import get_cost_centers_with_children
+
 
 
 class TestWbsSummaryReport(FrappeTestCase):
@@ -132,3 +134,6 @@ class TestWbsSummaryReport(FrappeTestCase):
 		# Totals should be updated
 		self.assertEqual(totals["amt_allocated"], 50)
 		self.assertEqual(totals["amt_utilized"], 20)
+
+	def test_get_cost_centers_with_children():
+		pass
