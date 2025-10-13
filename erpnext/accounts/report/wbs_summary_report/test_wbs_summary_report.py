@@ -4,9 +4,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.report.wbs_summary_report import wbs_summary_report
-from erpnext.accounts.report.wbs_summary_report import get_cost_centers_with_children
-
-
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 
 class TestWbsSummaryReport(FrappeTestCase):
 	def test_execute_with_empty_filters_TC_ACC_589(self):
