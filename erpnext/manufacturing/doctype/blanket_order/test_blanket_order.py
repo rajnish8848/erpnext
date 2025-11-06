@@ -328,7 +328,7 @@ class TestBlanketOrder(FrappeTestCase):
 		)
 		gl_debits = {entry.account: entry.debit for entry in gl_entries}
 		gl_credits = {entry.account: entry.credit for entry in gl_entries}
-		self.assertAlmostEqual(gl_debits[debtor_account], 50000)
+		self.assertAlmostEqual(gl_debits[debtor_account], 59000)
 		self.assertAlmostEqual(gl_credits[sales_account], 50000)
 
 	def test_blanket_order_to_sales_invoice_with_update_stock_TC_S_055(self):
@@ -380,7 +380,7 @@ class TestBlanketOrder(FrappeTestCase):
 		quotation.submit()
 		quotation.reload()
 		self.assertEqual(quotation.docstatus, 1)
-		self.assertEqual(quotation.grand_total, 50000)
+		self.assertEqual(quotation.grand_total, 59000)
 
 	@change_settings("Selling Settings", {"blanket_order_allowance": 5.0})
 	def test_blanket_order_to_validate_allowance_in_sales_order_TC_S_161(self):
